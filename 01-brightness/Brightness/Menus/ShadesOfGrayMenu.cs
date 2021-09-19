@@ -10,8 +10,8 @@ namespace GraphFunc.Menus
         {
             return FastBitmap.Select(b, cl =>
             {
-                var br = (byte)Math.Ceiling(0.3 * cl.r + 0.59 * cl.g + 0.11 * cl.b);
-                return (br, br, br);
+                var br = (byte)Math.Ceiling(0.3 * cl.R + 0.59 * cl.G + 0.11 * cl.B);
+                return Color.FromArgb(br, br, br);
             });
         }
         
@@ -19,8 +19,8 @@ namespace GraphFunc.Menus
         {
             return FastBitmap.Select(b, cl =>
             {
-                var br = (byte)Math.Ceiling(0.21 * cl.r + 0.72 * cl.g + 0.07 * cl.b);
-                return (br, br, br);
+                var br = (byte)Math.Ceiling(0.21 * cl.R + 0.72 * cl.G + 0.07 * cl.B);
+                return Color.FromArgb(br, br, br);
             });
         }
 
@@ -34,24 +34,24 @@ namespace GraphFunc.Menus
             {
                 for (var i = 0; i < fb1.Count; i++)
                 {
-                    var diff = (byte) Math.Abs(fb1.GetI(i).r - fb2.GetI(i).r);
-                    fb3.SetI(i, (diff, diff, diff));
+                    var diff = (byte) Math.Abs(fb1.GetI(i).R - fb2.GetI(i).R);
+                    fb3.SetI(i, Color.FromArgb(diff, diff, diff));
                 }
             }
 
             var (min, max) = ((byte) 255, (byte) 0);
             FastBitmap.ForEach(res, cl =>
             {
-                if (cl.r > max)
-                    max = cl.r;
-                if (cl.r < min)
-                    min = cl.r;
+                if (cl.R > max)
+                    max = cl.R;
+                if (cl.R < min)
+                    min = cl.R;
             });
             
             return FastBitmap.Select(res, cl =>
             {
-                var t = (byte) ((cl.r - min) / (double)(max - min) * 255);
-                return (t, t, t);
+                var t = (byte) ((cl.R - min) / (double)(max - min) * 255);
+                return Color.FromArgb(t, t, t);
             });;
         }
 

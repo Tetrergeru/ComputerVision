@@ -9,7 +9,7 @@ namespace GraphFunc
 {
     public static class Program
     {
-        public  static Bitmap Scale(this Bitmap image, int width, int height)
+        public static Bitmap Scale(this Bitmap image, int width, int height)
         {
             var b = new Bitmap(width, height);
             var drawer = Graphics.FromImage(b);
@@ -23,15 +23,15 @@ namespace GraphFunc
             var drawer = Graphics.FromImage(bitmap);
             double max = data.Max();
             for (var i = 0; i < data.Length; i++)
-                drawer.DrawLine(new Pen(color), i, 0, i, (int)(height * (data[i] / max)));
+                drawer.DrawLine(new Pen(color), i, 0, i, (int) (height * (data[i] / max)));
             return bitmap;
         }
 
         [STAThread]
         static void Main(string[] args)
         {
-            var _form = new Form(new List<IMenu>{new ShadesOfGrayMenu()});
-            Application.Run(_form);
+            var form = new Form(new List<IMenu> {new ShadesOfGrayMenu(), new ColorCorrection()});
+            Application.Run(form);
         }
     }
 }
