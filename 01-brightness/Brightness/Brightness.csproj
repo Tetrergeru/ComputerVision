@@ -54,6 +54,7 @@
     <Compile Include="Menus\FuncParser.cs" />
     <Compile Include="Menus\IMenu.cs" />
     <Compile Include="Menus\ColorCorrection.cs" />
+    <Compile Include="Menus\InteractiveColorCorrection.cs" />
     <Compile Include="Menus\ShadesOfGrayMenu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

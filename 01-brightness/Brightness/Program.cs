@@ -30,7 +30,7 @@ namespace GraphFunc
         [STAThread]
         static void Main(string[] args)
         {
-            var form = new Form(new List<IMenu> {new ShadesOfGrayMenu(), new ColorCorrection()});
+            var form = new Form(new List<IMenu> {new ShadesOfGrayMenu(), new ColorCorrection(), new InteractiveColorCorrection()});
             Application.Run(form);
         }
     }
