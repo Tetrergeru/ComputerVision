@@ -31,7 +31,7 @@ namespace GraphFunc.Menus
             ConsumeWhite();
             var left = ParseMult();
             ConsumeWhite();
-            if (pos == _code.Length)
+            if (pos == _code.Length || _code[pos] == ')')
                 return left;
             var ch = _code[pos];
             pos++;
@@ -52,7 +52,7 @@ namespace GraphFunc.Menus
             ConsumeWhite();
             var left = ParsePrimitive();
             ConsumeWhite();
-            if (pos == _code.Length)
+            if (pos == _code.Length || _code[pos] == ')' || (_code[pos] != '*' && _code[pos] != '/' && _code[pos] != '^'))
                 return left;
             var ch = _code[pos];
             pos++;

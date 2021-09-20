@@ -9,15 +9,17 @@ namespace GraphFunc.Menus
     public class HistCorrection : IMenu
     {
         private Form _form;
-        private readonly PictureBox[] _colorImages = new PictureBox[2];
+        private readonly PictureBox[] _colorImages = new PictureBox[3];
 
-        private List<double[]> _histograms = new bool[256]
-            .Select(x => new double[3])
-            .ToList();
+        private Bitmap _grayImage;
+
+        private static List<int> EmptyHist => new bool[256].Select(x => 0).ToList();
+
+        private List<int> _histogram = EmptyHist;
 
         public HistCorrection()
         {
-            for (var i = 0; i < 2; i++)
+            for (var i = 0; i < 3; i++)
             {
                 var colorImage = new PictureBox()
                 {
@@ -46,28 +48,79 @@ namespace GraphFunc.Menus
 
         public void Update(Form form)
         {
+            EvalHistograms(form);
+
             Normalization(form);
             Equalization(form);
         }
 
         private void EvalHistograms(Form form)
         {
-            FastBitmap.ForEach(form.image, color =>
-            {
-                _histograms[color.R][0] += 1;
-                _histograms[color.G][1] += 1;
-                _histograms[color.B][2] += 1;
-            });
+            _grayImage = FastBitmap
+                .Select(form.image.Scale(_colorImages[0].Width, _colorImages[0].Height), color =>
+                {
+                    var avg = Program.ToByte((color.R + color.G + color.B) / 3.0);
+                    return Color.FromArgb(avg, avg, avg);
+                });
+            _colorImages[0].Image = _grayImage;
+            _histogram = EmptyHist;
+            FastBitmap.ForEach(_grayImage, color => { _histogram[color.R] += 1; });
         }
 
         private void Normalization(Form form)
         {
-            _colorImages[0].Image = form.image.Scale(_colorImages[0].Width, _colorImages[0].Height);
+            var lut = Normalize(_histogram);
+            _colorImages[1].Image = FastBitmap
+                .Select(_grayImage.Scale(_colorImages[0].Width, _colorImages[0].Height), color => Color.FromArgb(
+                        Program.ToByte(lut[color.R]),
+                        Program.ToByte(lut[color.G]),
+                        Program.ToByte(lut[color.B])
+                    )
+                );
+        }
+
+        private List<int> Normalize(List<int> hist)
+        {
+            var result = EmptyHist;
+            var left = hist.FindIndex(x => x != 0);
+            var right = hist.FindLastIndex(x => x != 0) + 1;
+            var step = 256.0 / (right - left);
+            for (var i = 0; i < right - left; i++)
+                result[left + i] = Program.ToByte(step * i);
+            return result;
         }
 
         private void Equalization(Form form)
         {
-            _colorImages[1].Image = form.image.Scale(_colorImages[1].Width, _colorImages[1].Height);
+            var lut = Equalize(_histogram);
+            _colorImages[2].Image = FastBitmap
+                .Select(_grayImage.Scale(_colorImages[2].Width, _colorImages[2].Height), color => Color.FromArgb(
+                        Program.ToByte(lut[color.R]),
+                        Program.ToByte(lut[color.G]),
+                        Program.ToByte(lut[color.B])
+                    )
+                );
+        }
+
+        private List<int> Equalize(List<int> hist)
+        {
+            var q = (double) hist.Sum() / hist.Count;
+            var lut = EmptyHist;
+            var sum = 0.0;
+            var idx = 0;
+            foreach (var (v, i) in hist.Select((x, i) => (x, i)).Where(x => x.x != 0))
+            {
+                while (sum > v)
+                {
+                    idx++;
+                    sum -= q;
+                }
+
+                sum += v;
+                lut[i] = idx;
+            }
+
+            return lut;
         }
 
         public string Name() => "Hist correction";

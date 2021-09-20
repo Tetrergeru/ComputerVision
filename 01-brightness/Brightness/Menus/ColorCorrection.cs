@@ -123,9 +123,9 @@ namespace GraphFunc.Menus
             var srcColor = src.GetPixel(c.X, c.Y);
             _colorImages[0].Image = FastBitmap
                 .Select(form.image, color => Color.FromArgb(
-                        (byte) ((double) color.R / dstColor.R * srcColor.R),
-                        (byte) ((double) color.G / dstColor.G * srcColor.G),
-                        (byte) ((double) color.B / dstColor.B * srcColor.B)
+                        Program.ToByte( (double) color.R / dstColor.R * srcColor.R),
+                        Program.ToByte( (double) color.G / dstColor.G * srcColor.G),
+                        Program.ToByte( (double) color.B / dstColor.B * srcColor.B)
                     )
                 ).Scale(_colorImages[0].Width, _colorImages[0].Height);
 
@@ -152,9 +152,9 @@ namespace GraphFunc.Menus
             );
             _colorImages[1].Image = FastBitmap
                 .Select(form.image, color => Color.FromArgb(
-                        (byte) (color.R * avg / avgColors.R),
-                        (byte) (color.G * avg / avgColors.G),
-                        (byte) (color.B * avg / avgColors.B)
+                        Program.ToByte( color.R * avg / avgColors.R),
+                        Program.ToByte( color.G * avg / avgColors.G),
+                        Program.ToByte( color.B * avg / avgColors.B)
                     )
                 ).Scale(_colorImages[1].Width, _colorImages[1].Height);
         }
@@ -164,11 +164,12 @@ namespace GraphFunc.Menus
             var func = GetFunc(_funcBox.Text);
             _colorImages[2].Image = FastBitmap
                 .Select(form.image.Scale(_colorImages[1].Width, _colorImages[1].Height), color => Color.FromArgb(
-                        (byte) (func(color.R / 256.0) * 256),
-                        (byte) (func(color.G / 256.0) * 256),
-                        (byte) (func(color.B / 256.0) * 256)
+                        Program.ToByte( func(color.R / 256.0) * 256),
+                        Program.ToByte( func(color.G / 256.0) * 256),
+                        Program.ToByte( func(color.B / 256.0) * 256)
                     )
                 );
+            Console.WriteLine("Func done");
         }
 
         public string Name() => "Color correction";
@@ -182,6 +183,7 @@ namespace GraphFunc.Menus
             }
             catch
             {
+                Console.WriteLine("Error compiling");
                 return x => x;
             }
         }

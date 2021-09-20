@@ -9,6 +9,16 @@ namespace GraphFunc
 {
     public static class Program
     {
+        public static byte ToByte(double v)
+        {
+            var i = (int) v;
+            if (i > 255)
+                return 255;
+            if (i < 0)
+                return 0;
+            return (byte)i;
+        }
+
         public static Bitmap Scale(this Bitmap image, int width, int height)
         {
             var b = new Bitmap(width, height);
@@ -17,12 +27,13 @@ namespace GraphFunc
             return b;
         }
 
-        public static Bitmap DrawPlot(int[] data, Color color, int height)
+        public static Bitmap DrawPlot(IReadOnlyList<int> data, Color color, int height)
         {
-            var bitmap = new Bitmap(data.Length, height);
+            var bitmap = new Bitmap(data.Count, height);
             var drawer = Graphics.FromImage(bitmap);
             double max = data.Max();
-            for (var i = 0; i < data.Length; i++)
+            drawer.Clear(Color.FromArgb(255 - color.R, 255 - color.G, 255 - color.B));
+            for (var i = 0; i < data.Count; i++)
                 drawer.DrawLine(new Pen(color), i, 0, i, (int) (height * (data[i] / max)));
             return bitmap;
         }

@@ -41,17 +41,19 @@ namespace GraphFunc.Menus
                     DrawLinear(_form);
                 }
             };
-            
+
             _colorImages[2].MouseClick += (sender, args) =>
             {
                 if (args.Button == MouseButtons.Right)
                 {
-                    _splineInterpolationPoints = _splineInterpolationPoints.Where(p => Distance(p, args.Location) > 5).ToList();
+                    _splineInterpolationPoints =
+                        _splineInterpolationPoints.Where(p => Distance(p, args.Location) > 5).ToList();
                     DrawLinear(_form);
                 }
                 else
                 {
-                    _splineInterpolationPoints = _splineInterpolationPoints.Append(args.Location).OrderBy(p => p.X).ToList();
+                    _splineInterpolationPoints =
+                        _splineInterpolationPoints.Append(args.Location).OrderBy(p => p.X).ToList();
                     DrawSpline(_form);
                 }
             };
@@ -97,9 +99,9 @@ namespace GraphFunc.Menus
             Func<double, double> func = LinearFunc;
             _colorImages[0].Image = FastBitmap
                 .Select(form.image.Scale(_colorImages[1].Width, _colorImages[1].Height), color => Color.FromArgb(
-                        (byte) (func(color.R / 256.0) * 256),
-                        (byte) (func(color.G / 256.0) * 256),
-                        (byte) (func(color.B / 256.0) * 256)
+                        Program.ToByte(func(color.R / 256.0) * 256),
+                        Program.ToByte(func(color.G / 256.0) * 256),
+                        Program.ToByte(func(color.B / 256.0) * 256)
                     )
                 );
         }
@@ -116,6 +118,7 @@ namespace GraphFunc.Menus
                 g.DrawLine(pen, p0, p);
                 p0 = p;
             }
+
             g.DrawLine(pen, p0, new Point(_colorImages[2].Width, 0));
         }
 
