@@ -91,8 +91,8 @@ namespace GraphFunc.Menus
             Func<double, double> func = LinearFunc;
 
             if (_linearActive)
-                _colorImages[0].Image = FastBitmap
-                    .Select(form.image.Scale(_colorImages[1].Width, _colorImages[1].Height), color => Color.FromArgb(
+                _colorImages[0].Image = form.image.Scale(_colorImages[1].Width, _colorImages[1].Height)
+                    .Select(color => Color.FromArgb(
                             Program.ToByte(func(color.R / 256.0) * 256),
                             Program.ToByte(func(color.G / 256.0) * 256),
                             Program.ToByte(func(color.B / 256.0) * 256)
@@ -126,8 +126,8 @@ namespace GraphFunc.Menus
             }
 
             if (!_linearActive)
-                _colorImages[0].Image = FastBitmap
-                    .Select(form.image.Scale(_colorImages[0].Width, _colorImages[0].Height), color => Color.FromArgb(
+                _colorImages[0].Image = form.image.Scale(_colorImages[0].Width, _colorImages[0].Height)
+                    .Select(color => Color.FromArgb(
                             Program.ToByte(256 - interpolation.Interpolate(color.R)),
                             Program.ToByte(256 - interpolation.Interpolate(color.G)),
                             Program.ToByte(256 - interpolation.Interpolate(color.B))

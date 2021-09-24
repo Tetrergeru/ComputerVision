@@ -56,22 +56,22 @@ namespace GraphFunc.Menus
 
         private void EvalHistograms(Form form)
         {
-            _grayImage = FastBitmap
-                .Select(form.image.Scale(_colorImages[0].Width, _colorImages[0].Height), color =>
+            _grayImage = form.image.Scale(_colorImages[0].Width, _colorImages[0].Height)
+                .Select(color =>
                 {
                     var avg = Program.ToByte((color.R + color.G + color.B) / 3.0);
                     return Color.FromArgb(avg, avg, avg);
                 });
             _colorImages[0].Image = _grayImage;
             _histogram = EmptyHist;
-            FastBitmap.ForEach(_grayImage, color => { _histogram[color.R] += 1; });
+            _grayImage.ForEach(color => { _histogram[color.R] += 1; });
         }
 
         private void Normalization(Form form)
         {
             var lut = Normalize(_histogram);
-            _colorImages[1].Image = FastBitmap
-                .Select(_grayImage.Scale(_colorImages[0].Width, _colorImages[0].Height), color => Color.FromArgb(
+            _colorImages[1].Image = _grayImage.Scale(_colorImages[0].Width, _colorImages[0].Height)
+                .Select(color => Color.FromArgb(
                         Program.ToByte(lut[color.R]),
                         Program.ToByte(lut[color.G]),
                         Program.ToByte(lut[color.B])
@@ -93,8 +93,8 @@ namespace GraphFunc.Menus
         private void Equalization(Form form)
         {
             var lut = Equalize(_histogram);
-            _colorImages[2].Image = FastBitmap
-                .Select(_grayImage.Scale(_colorImages[2].Width, _colorImages[2].Height), color => Color.FromArgb(
+            _colorImages[2].Image = _grayImage.Scale(_colorImages[2].Width, _colorImages[2].Height)
+                .Select(color => Color.FromArgb(
                         Program.ToByte(lut[color.R]),
                         Program.ToByte(lut[color.G]),
                         Program.ToByte(lut[color.B])

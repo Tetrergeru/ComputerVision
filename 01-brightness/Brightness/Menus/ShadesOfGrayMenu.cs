@@ -8,7 +8,7 @@ namespace GraphFunc.Menus
     {
         private static Bitmap GrayShade1(Bitmap b)
         {
-            return FastBitmap.Select(b, cl =>
+            return b.Select(cl =>
             {
                 var br = Program.ToByte(Math.Ceiling(0.3 * cl.R + 0.59 * cl.G + 0.11 * cl.B));
                 return Color.FromArgb(br, br, br);
@@ -17,7 +17,7 @@ namespace GraphFunc.Menus
         
         private static Bitmap GrayShade2(Bitmap b)
         {
-            return FastBitmap.Select(b, cl =>
+            return b.Select(cl =>
             {
                 var br = Program.ToByte(Math.Ceiling(0.21 * cl.R + 0.72 * cl.G + 0.07 * cl.B));
                 return Color.FromArgb(br, br, br);
@@ -34,13 +34,13 @@ namespace GraphFunc.Menus
             {
                 for (var i = 0; i < fb1.Count; i++)
                 {
-                    var diff = Program.ToByte( Math.Abs(fb1.GetI(i).R - fb2.GetI(i).R));
-                    fb3.SetI(i, Color.FromArgb(diff, diff, diff));
+                    var diff = Program.ToByte( Math.Abs(fb1.GetPixel(i).R - fb2.GetPixel(i).R));
+                    fb3.GetPixel(i, Color.FromArgb(diff, diff, diff));
                 }
             }
 
             var (min, max) = (Program.ToByte(255), Program.ToByte( 0));
-            FastBitmap.ForEach(res, cl =>
+            res.ForEach(cl =>
             {
                 if (cl.R > max)
                     max = cl.R;
@@ -48,7 +48,7 @@ namespace GraphFunc.Menus
                     min = cl.R;
             });
             
-            return FastBitmap.Select(res, cl =>
+            return res.Select(cl =>
             {
                 var t = Program.ToByte( (cl.R - min) / (double)(max - min) * 255);
                 return Color.FromArgb(t, t, t);

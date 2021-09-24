@@ -121,11 +121,11 @@ namespace GraphFunc.Menus
 
             var dstColor = _colorButton.BackColor;
             var srcColor = src.GetPixel(c.X, c.Y);
-            _colorImages[0].Image = FastBitmap
-                .Select(form.image, color => Color.FromArgb(
-                        Program.ToByte( (double) color.R / dstColor.R * srcColor.R),
-                        Program.ToByte( (double) color.G / dstColor.G * srcColor.G),
-                        Program.ToByte( (double) color.B / dstColor.B * srcColor.B)
+            _colorImages[0].Image = form.image
+                .Select(color => Color.FromArgb(
+                        Program.ToByte((double) color.R / dstColor.R * srcColor.R),
+                        Program.ToByte((double) color.G / dstColor.G * srcColor.G),
+                        Program.ToByte((double) color.B / dstColor.B * srcColor.B)
                     )
                 ).Scale(_colorImages[0].Width, _colorImages[0].Height);
 
@@ -136,7 +136,7 @@ namespace GraphFunc.Menus
         private void GrayWorld(Form form)
         {
             var sum = (R: 0, G: 0, B: 0);
-            FastBitmap.ForEach(form.image, color =>
+            form.image.ForEach(color =>
             {
                 sum.R += color.R;
                 sum.G += color.G;
@@ -150,11 +150,11 @@ namespace GraphFunc.Menus
                 G: (double) sum.G / pixelsTotal,
                 B: (double) sum.B / pixelsTotal
             );
-            _colorImages[1].Image = FastBitmap
-                .Select(form.image, color => Color.FromArgb(
-                        Program.ToByte( color.R * avg / avgColors.R),
-                        Program.ToByte( color.G * avg / avgColors.G),
-                        Program.ToByte( color.B * avg / avgColors.B)
+            _colorImages[1].Image = form.image
+                .Select(color => Color.FromArgb(
+                        Program.ToByte(color.R * avg / avgColors.R),
+                        Program.ToByte(color.G * avg / avgColors.G),
+                        Program.ToByte(color.B * avg / avgColors.B)
                     )
                 ).Scale(_colorImages[1].Width, _colorImages[1].Height);
         }
@@ -162,11 +162,11 @@ namespace GraphFunc.Menus
         private void CorrectFunc(Form form)
         {
             var func = GetFunc(_funcBox.Text);
-            _colorImages[2].Image = FastBitmap
-                .Select(form.image.Scale(_colorImages[1].Width, _colorImages[1].Height), color => Color.FromArgb(
-                        Program.ToByte( func(color.R / 256.0) * 256),
-                        Program.ToByte( func(color.G / 256.0) * 256),
-                        Program.ToByte( func(color.B / 256.0) * 256)
+            _colorImages[2].Image = form.image.Scale(_colorImages[1].Width, _colorImages[1].Height)
+                .Select(color => Color.FromArgb(
+                        Program.ToByte(func(color.R / 256.0) * 256),
+                        Program.ToByte(func(color.G / 256.0) * 256),
+                        Program.ToByte(func(color.B / 256.0) * 256)
                     )
                 );
             Console.WriteLine("Func done");
