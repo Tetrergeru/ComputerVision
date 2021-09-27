@@ -9,6 +9,9 @@ namespace GraphFunc
 {
     public static class Program
     {
+        public static List<T> EmptyHist<T>(int len = 256)
+            => new bool[len].Select(x => default(T)).ToList();
+
         public static byte ToByte(double v)
         {
             var i = (int) v;
@@ -47,6 +50,7 @@ namespace GraphFunc
                 new ColorCorrection(),
                 new InteractiveColorCorrection(), 
                 new HistCorrection(),
+                new Binarization(),
             });
             Application.Run(form);
         }

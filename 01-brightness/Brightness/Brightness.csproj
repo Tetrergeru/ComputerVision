@@ -60,6 +60,7 @@
     <Compile Include="Form.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Menus\Binarization.cs" />
     <Compile Include="Menus\FuncParser.cs" />
     <Compile Include="Menus\HistCorrection.cs" />
     <Compile Include="Menus\IMenu.cs" />

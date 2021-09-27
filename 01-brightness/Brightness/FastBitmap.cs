@@ -144,7 +144,20 @@ namespace GraphFunc
             for (var x = 0; x < source.Width; x += 1)
                 action(source[x, y]);
         }
-        
+
+        public static void ForEach(this Bitmap source, Action<Color, int, int> action)
+        {
+            using (var fastSource = new FastBitmap(source))
+                fastSource.ForEach(action);
+        }
+
+        public static void ForEach(this FastBitmap source, Action<Color, int, int> action)
+        {
+            for (var y = 0; y < source.Height; y += 1)
+            for (var x = 0; x < source.Width; x += 1)
+                action(source[x, y], x, y);
+        }
+
         /// <summary>
         /// Возвращает новую Bitmap, все пиксели которой получены преобразованием пикселей
         /// заданного Bitmap определённым образои.
@@ -152,6 +165,12 @@ namespace GraphFunc
         /// <param name="source">Искходны Bitmap.</param>
         /// <param name="transform">Преобразование, применяемое к пикселям исходного битмапа.</param>
         public static Bitmap Select(this Bitmap source, Func<Color, Color> transform)
+        {
+            using (var fastSource = new FastBitmap(source))
+                return fastSource.Select(transform);
+        }
+
+        public static Bitmap Select(this Bitmap source, Func<Color, int, int, Color> transform)
         {
             using (var fastSource = new FastBitmap(source))
                 return fastSource.Select(transform);
@@ -172,6 +191,20 @@ namespace GraphFunc
                 for (var y = 0; y < fastResult.Height; y += 1)
                 for (var x = 0; x < fastResult.Width; x += 1)
                     fastResult[x, y] = transform(source[x, y]);
+            }
+
+            return result;
+        }
+
+        public static Bitmap Select(this FastBitmap source, Func<Color, int, int, Color> transform)
+        {
+            var result = new Bitmap(source.Width, source.Height);
+
+            using (var fastResult = new FastBitmap(result))
+            {
+                for (var y = 0; y < fastResult.Height; y += 1)
+                for (var x = 0; x < fastResult.Width; x += 1)
+                    fastResult[x, y] = transform(source[x, y], x, y);
             }
 
             return result;
