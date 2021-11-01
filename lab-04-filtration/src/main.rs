@@ -125,10 +125,10 @@ fn main() -> Result<()> {
         image_mask_sum.convert_to(&mut image_mask_sum_f, CV_32F, 1.0, 0.0)?;
 
         let mut clone = image_mask_sum.clone();
-        pow(&image_mask_sum_f, 0.5, &mut clone)?;
+        pow(&image_mask_sum_f, 1.5, &mut clone)?;
 
         let mut clone2 = image_mask_sum.clone();
-        clone.convert_to(&mut clone2, CV_8UC1, 16.0, 0.0)?;
+        clone.convert_to(&mut clone2, CV_8UC1, 1.0, 0.0)?;
         clone2
     };
 
@@ -156,7 +156,6 @@ fn correction(image: &Mat) -> Result<Mat> {
         &mut max_idx,
         &no_array()?,
     )?;
-    println!("{}, {}", min, max);
     let mut clone = image.clone();
     image.convert_to(&mut clone, CV_32F, 1.0, -min)?;
 
