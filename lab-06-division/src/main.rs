@@ -17,6 +17,7 @@ use opencv::{
     },
     prelude::*,
     types::VectorOfMat,
+    ximgproc::erode,
     Result,
 };
 
@@ -35,118 +36,127 @@ fn main() -> Result<()> {
     let image_file = {
         let img = imgcodecs::imread("./src.png", IMREAD_GRAYSCALE)?;
         let mut clone = new_mat(CV_32F);
-        img.convert_to(&mut clone, CV_32F, 1.0 / 256.0, 0.0)?;
+        img.convert_to(&mut clone, CV_32F, 1.0 / 255.0, 0.0)?;
         clone
     };
 
     show("image file", &image_file)?;
 
-    let kernel = kernel()?;
+    // let kernel = kernel()?;
 
-    let mut image_laplacian = new_mat(CV_32F);
-    filter_2d(
-        &image_file,
-        &mut image_laplacian,
-        CV_32F,
-        &kernel,
-        Point::new(-1, -1),
-        0.0,
-        BORDER_DEFAULT,
-    )?;
+    // let mut image_laplacian = new_mat(CV_32F);
+    // filter_2d(
+    //     &image_file,
+    //     &mut image_laplacian,
+    //     CV_32F,
+    //     &kernel,
+    //     Point::new(-1, -1),
+    //     0.0,
+    //     BORDER_DEFAULT,
+    // )?;
 
-    let image_result = sub_image(&image_file, &image_laplacian)?;
+    // let image_result = sub_image(&image_file, &image_laplacian)?;
 
-    let image_result_cvt = convert(&image_result, CV_8UC1, 255.0)?;
-    let image_laplacian = convert_color(&image_laplacian, COLOR_GRAY2RGB)?;
+    let image_cvt = convert(&image_file, CV_8UC1, 255.0)?;
+    // let image_laplacian = convert_color(&image_laplacian, COLOR_GRAY2RGB)?;
 
-    highgui::imshow("image_laplacian", &image_laplacian)?;
-    highgui::imshow("image_result", &image_result_cvt)?;
-
-    println!("CV_8UC3 {}", CV_8UC3);
-    println!("CV_32F {}", CV_32F);
-    println!("CV_32S {}", CV_32S);
+    // highgui::imshow("image_laplacian", &image_laplacian)?;
+    // highgui::imshow("image_result", &image_result_cvt)?;
 
     let mut bw_thr = new_mat(CV_32F);
-    threshold(
-        &image_result_cvt,
-        &mut bw_thr,
-        150.0,
-        255.0,
-        THRESH_BINARY | THRESH_OTSU,
-    )?;
-    highgui::imshow("Binary Image", &bw_thr)?;
+    threshold(&image_cvt, &mut bw_thr, 100.0, 255.0, THRESH_BINARY)?;
 
-    let mut dist = new_mat(CV_32F);
+    let peaks = invert(&bw_thr)?; // ***
+    highgui::imshow("Peaks", &peaks)?;
 
-    distance_transform(&bw_thr, &mut dist, DIST_L2, 3, CV_32F)?;
+    // let mut bw_eroded = new_mat(CV_32F);
+    // let kernel1 = Mat::ones(5, 5, CV_8UC1)?;
+    // erode(
+    //     &bw_thr,
+    //     &mut bw_eroded,
+    //     &kernel1,
+    //     true,
+    //     Point::new(0, 0),
+    // )?;
 
-    let mut dist_norm = new_mat(CV_32F);
-    normalize(
-        &dist,
-        &mut dist_norm,
-        0.0,
-        1.0,
-        NORM_MINMAX,
-        -1,
-        &no_array(),
-    )?;
-    highgui::imshow("Distance Transform Image", &dist_norm)?;
+    // let mut dist = new_mat(CV_32F);
 
-    let mut dist_norm_thr = new_mat(CV_32F);
-    threshold(&dist_norm, &mut dist_norm_thr, 0.05, 1.0, THRESH_BINARY)?;
+    // distance_transform(&bw_thr, &mut dist, DIST_L2, 3, CV_32F)?;
 
-    let mut dist_norm_thr_dilated = new_mat(CV_32F);
+    // let mut dist_norm = new_mat(CV_32F);
+    // normalize(
+    //     &dist,
+    //     &mut dist_norm,
+    //     0.0,
+    //     1.0,
+    //     NORM_MINMAX,
+    //     -1,
+    //     &no_array(),
+    // )?;
+    // highgui::imshow("Distance Transform Image", &dist_norm)?;
+
+    // let mut dist_norm_thr = new_mat(CV_32F);
+    // threshold(&dist_norm, &mut dist_norm_thr, 0.05, 1.0, THRESH_BINARY)?;
+
+    let mut background_markers = new_mat(CV_32F);
     let kernel1 = Mat::ones(5, 5, CV_8UC1)?;
     dilate(
-        &dist_norm_thr,
-        &mut dist_norm_thr_dilated,
+        &peaks,
+        &mut background_markers,
         &kernel1,
         Point::new(-1, -1),
-        4,
+        7,
         BORDER_DEFAULT,
         morphology_default_border_value()?,
     )?;
 
-    let dist_norm_thr_dilated = invert(&dist_norm_thr_dilated)?; // ***
-    highgui::imshow("Peaks", &dist_norm_thr_dilated)?;
+    highgui::imshow("background_markers", &background_markers)?;
 
-    let dist_8u = convert(&dist_norm_thr_dilated, CV_8UC1, 1.0)?;
-    let mut contours = VectorOfMat::new();
-    find_contours(
-        &dist_8u,
-        &mut contours,
-        RETR_EXTERNAL,
-        CHAIN_APPROX_SIMPLE,
-        Point::new(0, 0),
-    )?;
-
-    let mut markers = Mat::zeros(dist.rows(), dist.cols(), CV_32S)?.to_mat()?;
-    println!("contours.len(): {}", contours.len());
-    for i in 0..contours.len() {
-        draw_contours(
-            &mut markers,
-            &contours,
-            i as i32,
-            Scalar::all(i as f64 + 1.0),
-            -1,
-            LINE_8,
-            &no_array(),
-            i32::MAX,
+    // Searching for contours on peaks Map
+    let mut markers = {
+        let dist_8u = convert(&peaks, CV_8UC1, 1.0)?;
+        let mut contours = VectorOfMat::new();
+        find_contours(
+            &dist_8u,
+            &mut contours,
+            RETR_EXTERNAL,
+            CHAIN_APPROX_SIMPLE,
             Point::new(0, 0),
         )?;
-    }
-    for (x, y) in [(5, 5), (72, 76), (136, 108), (20, 156), (154, 22), (66, 109)] {
-        circle(
-            &mut markers,
-            Point::new(x, y),
-            3,
-            Scalar::all(255.0),
-            -1,
-            LINE_8,
-            0,
-        )?;
-    }
 
+        let mut markers = Mat::zeros(dist_8u.rows(), dist_8u.cols(), CV_32S)?.to_mat()?;
+        println!("contours.len(): {}", contours.len());
+        for i in 0..contours.len() {
+            draw_contours(
+                &mut markers,
+                &contours,
+                i as i32,
+                Scalar::all(i as f64 + 1.0),
+                -1,
+                LINE_8,
+                &no_array(),
+                i32::MAX,
+                Point::new(0, 0),
+            )?;
+        }
+        for x in 0..dist_8u.rows() {
+            for y in 0..dist_8u.cols() {
+                if *background_markers.at_2d::<f32>(x, y)? <= 0.1 {
+                    *markers.at_2d_mut::<i32>(x, y)? = 255;
+                }
+            }
+            // circle(
+            //     &mut markers,
+            //     Point::new(x, y),
+            //     3,
+            //     Scalar::all(255.0),
+            //     -1,
+            //     LINE_8,
+            //     0,
+            // )?;
+        }
+        markers
+    };
     let markers_8u = convert(&markers, CV_8UC1, 20.0)?;
     highgui::imshow("Markers", &markers_8u)?;
 
@@ -155,7 +165,14 @@ fn main() -> Result<()> {
 
     watershed(&image_result, &mut markers)?;
 
-    let mark = convert(&markers, CV_8UC1, 20.0)?;
+    let mut mark = image_file.clone();
+    for x in 0..mark.rows() {
+        for y in 0..mark.cols() {
+            if *markers.at_2d::<i32>(x, y)? == -1 {
+                *mark.at_2d_mut::<f32>(x, y)? = 255.0;
+            }
+        }
+    }
     highgui::imshow("watershed", &mark)?;
 
     highgui::wait_key(-1)?;
