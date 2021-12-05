@@ -42,61 +42,28 @@ fn main() -> Result<()> {
 
     show("image file", &image_file)?;
 
-    // let kernel = kernel()?;
+    let kernel = kernel()?;
 
-    // let mut image_laplacian = new_mat(CV_32F);
-    // filter_2d(
-    //     &image_file,
-    //     &mut image_laplacian,
-    //     CV_32F,
-    //     &kernel,
-    //     Point::new(-1, -1),
-    //     0.0,
-    //     BORDER_DEFAULT,
-    // )?;
-
-    // let image_result = sub_image(&image_file, &image_laplacian)?;
+    let mut image_laplacian = new_mat(CV_32F);
+    filter_2d(
+        &image_file,
+        &mut image_laplacian,
+        CV_32F,
+        &kernel,
+        Point::new(-1, -1),
+        0.0,
+        BORDER_DEFAULT,
+    )?;
+    highgui::named_window("image_laplacian", 0)?;
+    highgui::imshow("image_laplacian", &convert(&image_laplacian, CV_32F, 1.0)?)?;
 
     let image_cvt = convert(&image_file, CV_8UC1, 255.0)?;
-    // let image_laplacian = convert_color(&image_laplacian, COLOR_GRAY2RGB)?;
-
-    // highgui::imshow("image_laplacian", &image_laplacian)?;
-    // highgui::imshow("image_result", &image_result_cvt)?;
 
     let mut bw_thr = new_mat(CV_32F);
     threshold(&image_cvt, &mut bw_thr, 100.0, 255.0, THRESH_BINARY)?;
 
-    let peaks = invert(&bw_thr)?; // ***
+    let peaks = invert(&bw_thr)?;
     highgui::imshow("Peaks", &peaks)?;
-
-    // let mut bw_eroded = new_mat(CV_32F);
-    // let kernel1 = Mat::ones(5, 5, CV_8UC1)?;
-    // erode(
-    //     &bw_thr,
-    //     &mut bw_eroded,
-    //     &kernel1,
-    //     true,
-    //     Point::new(0, 0),
-    // )?;
-
-    // let mut dist = new_mat(CV_32F);
-
-    // distance_transform(&bw_thr, &mut dist, DIST_L2, 3, CV_32F)?;
-
-    // let mut dist_norm = new_mat(CV_32F);
-    // normalize(
-    //     &dist,
-    //     &mut dist_norm,
-    //     0.0,
-    //     1.0,
-    //     NORM_MINMAX,
-    //     -1,
-    //     &no_array(),
-    // )?;
-    // highgui::imshow("Distance Transform Image", &dist_norm)?;
-
-    // let mut dist_norm_thr = new_mat(CV_32F);
-    // threshold(&dist_norm, &mut dist_norm_thr, 0.05, 1.0, THRESH_BINARY)?;
 
     let mut background_markers = new_mat(CV_32F);
     let kernel1 = Mat::ones(5, 5, CV_8UC1)?;
@@ -125,7 +92,6 @@ fn main() -> Result<()> {
         )?;
 
         let mut markers = Mat::zeros(dist_8u.rows(), dist_8u.cols(), CV_32S)?.to_mat()?;
-        println!("contours.len(): {}", contours.len());
         for i in 0..contours.len() {
             draw_contours(
                 &mut markers,
@@ -145,22 +111,13 @@ fn main() -> Result<()> {
                     *markers.at_2d_mut::<i32>(x, y)? = 255;
                 }
             }
-            // circle(
-            //     &mut markers,
-            //     Point::new(x, y),
-            //     3,
-            //     Scalar::all(255.0),
-            //     -1,
-            //     LINE_8,
-            //     0,
-            // )?;
         }
         markers
     };
     let markers_8u = convert(&markers, CV_8UC1, 20.0)?;
     highgui::imshow("Markers", &markers_8u)?;
 
-    let image_result = convert(&convert_color(&image_file, COLOR_GRAY2BGR)?, CV_8UC3, 1.0)?;
+    let image_result = convert(&convert_color(&image_laplacian, COLOR_GRAY2BGR)?, CV_8UC3, 1.0)?;
     println!("type {}", image_result.typ());
 
     watershed(&image_result, &mut markers)?;
@@ -174,7 +131,6 @@ fn main() -> Result<()> {
         }
     }
     highgui::imshow("watershed", &mark)?;
-
     highgui::wait_key(-1)?;
 
     Ok(())
