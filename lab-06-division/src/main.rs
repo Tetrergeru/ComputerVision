@@ -1,23 +1,17 @@
-use std::ops::Sub;
-
 use opencv::{
     core::{
-        abs, add, dft, idft, log, magnitude, merge, min_max_loc, no_array, normalize, split,
-        subtract, Mat, Point, Rect, Scalar, VecN, BORDER_DEFAULT, CV_32F, CV_32FC1, CV_32S,
-        CV_32SC1, CV_64F, CV_64FC1, CV_8UC1, CV_8UC3, CV_8UC4, DFT_COMPLEX_INPUT,
-        DFT_COMPLEX_OUTPUT, DFT_REAL_OUTPUT, DFT_SCALE, NORM_MINMAX,
+        abs, min_max_loc, no_array, subtract, Mat, Point, Scalar, BORDER_DEFAULT, CV_32F, CV_32FC1,
+        CV_32S, CV_64FC1, CV_8UC1, CV_8UC3,
     },
     highgui,
-    imgcodecs::{self, IMREAD_COLOR, IMREAD_GRAYSCALE},
+    imgcodecs::{self, IMREAD_GRAYSCALE},
     imgproc::{
-        circle, cvt_color, dilate, distance_transform, draw_contours, filter_2d, find_contours,
-        flood_fill, morphology_default_border_value, sobel, threshold, watershed,
-        CHAIN_APPROX_SIMPLE, COLOR_BGR2GRAY, COLOR_GRAY2BGR, COLOR_GRAY2RGB, DIST_L2, INTER_MAX,
-        LINE_8, RETR_EXTERNAL, THRESH_BINARY, THRESH_OTSU,
+        cvt_color, dilate, draw_contours, filter_2d, find_contours,
+        morphology_default_border_value, threshold, watershed, CHAIN_APPROX_SIMPLE, COLOR_GRAY2BGR,
+        LINE_8, RETR_EXTERNAL, THRESH_BINARY,
     },
     prelude::*,
     types::VectorOfMat,
-    ximgproc::erode,
     Result,
 };
 
@@ -117,7 +111,11 @@ fn main() -> Result<()> {
     let markers_8u = convert(&markers, CV_8UC1, 20.0)?;
     highgui::imshow("Markers", &markers_8u)?;
 
-    let image_result = convert(&convert_color(&image_laplacian, COLOR_GRAY2BGR)?, CV_8UC3, 1.0)?;
+    let image_result = convert(
+        &convert_color(&image_laplacian, COLOR_GRAY2BGR)?,
+        CV_8UC3,
+        1.0,
+    )?;
     println!("type {}", image_result.typ());
 
     watershed(&image_result, &mut markers)?;
